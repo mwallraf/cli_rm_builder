@@ -8,7 +8,7 @@ from ansible_collections.ansible.netcommon.plugins.module_utils.network.common.u
 
 
 def to_argspec(documentation):
-    return convert_doc_to_ansible_module_kwargs(documentation)
+    return convert_doc_to_ansible_module_kwargs(str(documentation))
 
 
 class FilterModule(object):

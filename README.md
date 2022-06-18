@@ -5,16 +5,16 @@
 The `cli_rm_builder` is an Ansible Collection that helps developers scaffold and maintain Ansible Network Resource Modules.
 
 **Capabilities**
+
 - Use a pre-defined docstring (in YAML) to scaffold a resource module directory layout and initial class files in an Ansible Collection.
 - Maintain the module `DOCUMENTATION` as the source of truth for the module argspec and use the builder to update the source files as needed.
 - Generates working sample modules for both `<network_os>_<resource>` and `<network_os>_facts`
-
 
 ### Usage
 
 ```
 pip install ansible-base
-ansible-galaxy collection install git+https://github.com/ansible-network/cli_rm_builder.git
+ansible-galaxy collection install git+https://github.com/mwallraf/cli_rm_builder
 ```
 
 ```yaml
@@ -26,8 +26,8 @@ run.yml
     - ansible_network.cli_rm_builder.run
 ```
 
-
 #### Builing a new module/collection
+
 ```
 ansible-playbook -e rm_dest=<destination for modules and module utils> \
                  -e collection_org=<collection_org> \
@@ -39,6 +39,7 @@ ansible-playbook -e rm_dest=<destination for modules and module utils> \
 ```
 
 #### Updating an existing module (regenerate argspec from docstring)
+
 ```
 ansible-playbook -e rm_dest=<destination for modules and module utils> \
                  -e collection_org=<collection_org> \
@@ -59,8 +60,8 @@ ansible-playbook -e rm_dest=<destination for modules and module utils> \
 
 See the `docstrings` directory for an example.
 
-***Note***: Within the scaffolded module file, the keys in the `RETURN` string have `type: dict` by default.
-            These should be updated to `type: dict` if `config` key in module argspec is a list of dictionaries.
+**_Note_**: Within the scaffolded module file, the keys in the `RETURN` string have `type: dict` by default.
+These should be updated to `type: dict` if `config` key in module argspec is a list of dictionaries.
 
 ### Examples
 
@@ -130,6 +131,7 @@ Please refer to [using collections in a playbook](https://docs.ansible.com/ansib
 `plugins/modules/<ansible_network_os>_<resource>.py`
 
 - Import `module_utils` resource package and calls `execute_module` API
+
 ```
 def main():
     result = <resource_package>(module).execute_module()
@@ -139,8 +141,8 @@ def main():
 
 `module_utils/network/<ansible_network_os>/argspec/<resource>/`
 
-- Argspec for the resource. 
-- The recommended way of updating the argspec is by updating the module docstring 
+- Argspec for the resource.
+- The recommended way of updating the argspec is by updating the module docstring
   first and then running the Resource Module Builder to update the argspec. This ensures
   that both the artifacts are always in sync.
 
@@ -152,9 +154,8 @@ def main():
 - Entry in `module_utils/network/<ansible_network_os>/facts/facts.py` for `get_facts` API to keep
   `<ansible_network_os>_facts` module and facts gathered for the resource module in sync
   for every subset.
-- Entry under the imports to register the Module's fact class- 
-  `from ansible_collections.<ansible_network_org>.<ansible_network_os>.plugins.module_utils.network.
-  <ansible_network_os>.facts.<resource>.<resource> import (<Resource>Facts,)`
+- Entry under the imports to register the Module's fact class-
+  `from ansible_collections.<ansible_network_org>.<ansible_network_os>.plugins.module_utils.network. <ansible_network_os>.facts.<resource>.<resource> import (<Resource>Facts,)`
 - An entry in the global variable `FACT_RESOURCE_SUBSETS` is required in order to add it to the resource
   subsets as `<resource>=<Resource>Facts`.
 
@@ -162,12 +163,13 @@ def main():
 
 `module_utils/network/<ansible_network_os>/rm_templates/<resource>`
 
-- Define a list of parser templates that the `NetworkTemplate` parent class in `ansible.netcommon` 
+- Define a list of parser templates that the `NetworkTemplate` parent class in `ansible.netcommon`
   uses to converts native configuration to Ansible structured data and vice versa.
 
 - Example parser template:
+
 ```
-    {  
+    {
         "name": "auto_cost",
         "getval": re.compile(
             r"""
@@ -197,24 +199,25 @@ def main():
 
 `module_utils/network/<ansible_network_os>/<config>/<resource>/`
 
-- Implement `execute_module` API that uses the existing device configuration (`have`), 
-  the task input (`want`), and the `compare` functionality provided by the 
-  parent class `ResourceModule` in `ansible.netcommon` to render and push 
+- Implement `execute_module` API that uses the existing device configuration (`have`),
+  the task input (`want`), and the `compare` functionality provided by the
+  parent class `ResourceModule` in `ansible.netcommon` to render and push
   configuration commands to the target device.
 
 - The task run result contains the following keys:
-     - `before`: state of the `<resource>` in target device before module execution (as structured data)
-     - `after`: state of the `<resource>` in target device after module execution (as structured data)
-     - `commands`: list of commands sent to the target device
-     - `changed`: `True` or `False` depending on whether the task run was idempotent
-     - `gathered`: state of the `<resource>` in target device (as structured data) [only when `state`: `gathered`]
-     - `parsed`: configuration passed through the `running_config` option as structured data [only when `state`: `parsed`]
-     - `rendered`: provided configuration in the task as device native config lines [only when `state`: `rendered`]
+
+  - `before`: state of the `<resource>` in target device before module execution (as structured data)
+  - `after`: state of the `<resource>` in target device after module execution (as structured data)
+  - `commands`: list of commands sent to the target device
+  - `changed`: `True` or `False` depending on whether the task run was idempotent
+  - `gathered`: state of the `<resource>` in target device (as structured data) [only when `state`: `gathered`]
+  - `parsed`: configuration passed through the `running_config` option as structured data [only when `state`: `parsed`]
+  - `rendered`: provided configuration in the task as device native config lines [only when `state`: `rendered`]
 
 - By default, the `empty_fact_val` is set to dict (`{}`). This needs to be updated to be list (`[]`) if `config` is a list
   of dictionaries.
 
-    ***Note***: Please refer to [Network resource module states](https://docs.ansible.com/ansible/latest/network/user_guide/network_resource_modules.html#network-resource-module-states) for more information.
+  **_Note_**: Please refer to [Network resource module states](https://docs.ansible.com/ansible/latest/network/user_guide/network_resource_modules.html#network-resource-module-states) for more information.
 
 **Utils**
 
